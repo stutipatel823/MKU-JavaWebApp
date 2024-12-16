@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-webapp
+  labels:
+    app: frontend-webapp
+spec:
+  replicas: 1  # You can adjust based on your availability requirements
+  selector:
+    matchLabels:
+      app: frontend-webapp
+  template:
+    metadata:
+      labels:
+        app: frontend-webapp
+    spec:
+      containers:
+        - name: frontend-webapp
+          image: stutipatel8/learn:frontendWebApp  # Ensure this image is pushed to Docker Hub
+          imagePullPolicy: Always  # Always pull the latest image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: "frontend-db"  # This should match the service name for the MySQL DB
+            - name: DB_PORT
+              value: "3306"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-webapp-service
+spec:
+  selector:
+    app: frontend-webapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer  # This exposes your frontend to the internet (for GKE)

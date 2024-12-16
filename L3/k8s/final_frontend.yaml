@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-db
+  labels:
+    app: frontend-db
+spec:
+  replicas: 1  # For MySQL, we typically run 1 replica unless clustering is required
+  selector:
+    matchLabels:
+      app: frontend-db
+  template:
+    metadata:
+      labels:
+        app: frontend-db
+    spec:
+      containers:
+        - name: frontend-db
+          image: stutipatel8/learn:frontenddb
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root1234"
+            - name: MYSQL_DATABASE
+              value: "Frontend_MKU"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              # mountPath: /var/lib/mysql
+              mountPath: /data/frontend-db
+      volumes:
+        - name: storage
+          emptyDir: {}  # You can replace this with a PersistentVolumeClaim for data persistence
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-db
+spec:
+  selector:
+    app: frontend-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-webapp
+  labels:
+    app: frontend-webapp
+spec:
+  replicas: 1  # You can adjust based on your availability requirements
+  selector:
+    matchLabels:
+      app: frontend-webapp
+  template:
+    metadata:
+      labels:
+        app: frontend-webapp
+    spec:
+      containers:
+        - name: frontend-webapp
+          image: stutipatel8/learn:frontendWebApp  # Ensure this image is pushed to Docker Hub
+          imagePullPolicy: Always  # Always pull the latest image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: "frontend-db"  # This should match the service name for the MySQL DB
+            - name: DB_PORT
+              value: "3306"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-webapp-service
+spec:
+  selector:
+    app: frontend-webapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer  # This exposes your frontend to the internet (for GKE)

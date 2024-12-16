@@ -1,0 +1,201 @@
+# Frontend DB Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-db
+  labels:
+    app: frontend-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-db
+  template:
+    metadata:
+      labels:
+        app: frontend-db
+    spec:
+      containers:
+        - name: frontend-db
+          image: stutipatel8/learn:frontenddb
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root1234"
+            - name: MYSQL_DATABASE
+              value: "Frontend_MKU"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: frontend-storage
+              mountPath: /data/frontend-db
+      volumes:
+        - name: frontend-storage
+          persistentVolumeClaim:
+            claimName: frontend-db-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frontend-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-db
+spec:
+  selector:
+    app: frontend-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+# Frontend WebApp Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-webapp
+  labels:
+    app: frontend-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-webapp
+  template:
+    metadata:
+      labels:
+        app: frontend-webapp
+    spec:
+      containers:
+        - name: frontend-webapp
+          image: stutipatel8/learn:frontendWebApp
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: "frontend-db"
+            - name: DB_PORT
+              value: "3306"
+            - name: cartService
+              value: cart-webapp-service:80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-webapp-service
+spec:
+  selector:
+    app: frontend-webapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
+
+# Cart DB Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-db
+  labels:
+    app: cart-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-db
+  template:
+    metadata:
+      labels:
+        app: cart-db
+    spec:
+      containers:
+        - name: cart-db
+          image: stutipatel8/learn:cartdb
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root1234"
+            - name: MYSQL_DATABASE
+              value: "Cart_MKU"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: cart-storage
+              mountPath: /data/cart-db
+      volumes:
+        - name: cart-storage
+          persistentVolumeClaim:
+            claimName: cart-db-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cart-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-db
+spec:
+  selector:
+    app: cart-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+# Cart WebApp Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-webapp
+  labels:
+    app: cart-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-webapp
+  template:
+    metadata:
+      labels:
+        app: cart-webapp
+    spec:
+      containers:
+        - name: cart-webapp
+          image: stutipatel8/learn:cartWebApp
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: "cart-db"
+            - name: DB_PORT
+              value: "3306"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-webapp-service
+spec:
+  selector:
+    app: cart-webapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

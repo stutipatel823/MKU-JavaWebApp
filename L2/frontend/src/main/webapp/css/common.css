@@ -1,0 +1,109 @@
+/* Base font size */
+:root {
+  font-size: 16px;
+}
+
+/* Body styles */
+body {
+  font-family: Calibri, Helvetica, sans-serif;
+  background-color: rgba(211, 237, 234, 1);
+  height: 100vh;
+}
+
+button:hover {
+  opacity: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.container {
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+/*   justify-content: center; */
+  align-items: center;
+}
+
+/* Form container */
+.menu-container {
+  width: 75%;
+  max-width: 50rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  box-shadow: 10px 10px #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+
+.btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid;
+  border-radius: 5px;
+  font-size: 14px;
+  margin: 0.1rem;
+}
+.title{
+  border: 1px solid black;
+  width: 50%;
+  background-color: bisque;
+  /* box-shadow: 5px 5px black; */
+  text-align: center;
+  padding: 5px;
+}
+
+/* Table styling */
+table, thead {
+  border: 2px solid black;
+}
+
+th, td {
+  border: 1px solid black;
+}
+
+th {
+  padding: 5px;
+}
+
+td {
+  font-family: 'Times New Roman', Times;
+}
+/* Navbar styles */
+.navbar {
+  width: 100%; 
+  display: flex;
+  justify-content: flex-end; /* Align links to the right */
+  position: sticky; /* Sticks to the top on scroll */
+  top: 0; /* Top of the viewport */
+  z-index: 1000; /* Ensure it appears above other content */
+  padding: 1rem; /* Padding around the navbar */
+}
+
+.nav-link {
+  text-decoration: none; /* Remove underline */
+  color: black;
+  margin: 0 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.nav-link:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+
+/* Media Queries for screen size adjustments */
+@media (max-width: 768px) {
+  
+  th,td{
+    font-size: 12px;
+  }
+  .menu-container{
+      min-width: fit-content;
+  }
+}

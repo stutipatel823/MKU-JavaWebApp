@@ -1,0 +1,75 @@
+# version: "3.8"
+
+services:
+  frontend-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-FrontendWebApp  # Reference the correct Dockerfile for the frontend
+    ports:
+      - "8080:8080"  # Expose Tomcat port to localhost
+    environment:
+      DB_URL: frontend-db  # The hostname 'frontend-db' refers to the frontend db service
+      DB_PORT: 3306
+      cartService: cart-webapp:8080  # Correct internal port
+    networks:
+      - app-network
+    depends_on:
+      - frontend-db  # Make sure the frontend database starts first
+      - cart-webapp  # Ensure cart service starts before frontend
+
+
+  frontend-db:
+    image: stutipatel/learn:frontenddb  # Use the official MySQL image
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-FrontendDB  # Reference the Dockerfile for the frontend DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: Frontend_MKU
+    ports:
+      - "3307:3306"  # Expose MySQL port for the frontend DB
+    networks:
+      - app-network
+    volumes:
+      - frontend-db-data:/var/lib/mysql  # Persist MySQL data for the frontend
+      # - ./sql:/docker-entrypoint-initdb.d  # Remove Shared Database as each container should have their own database
+
+  cart-webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-CartWebApp  # Reference the correct Dockerfile for the cart web app
+    ports:
+      - "8081:8080"  # Expose Cart webapp on a different port
+    environment:
+      DB_URL: cart-db  # The hostname 'cart-db' refers to the cart db service
+      DB_PORT: 3306
+    networks:
+      - app-network
+    depends_on:
+      - cart-db  # Ensure the Cart DB starts before the web app
+
+  cart-db:
+    image: stutipatel/learn:cartdb  # Use the official MySQL image
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-CartDB  # Reference the Dockerfile for the cart DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: Cart_MKU
+    ports:
+      - "3308:3306"  # Expose MySQL port for the cart DB
+    networks:
+      - app-network
+    volumes:
+      - cart-db-data:/var/lib/mysql  # Persist MySQL data for the cart DB
+      # - ./sql:/docker-entrypoint-initdb.d  # Remove Shared Database as each container should have their own database
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  frontend-db-data: {}
+  cart-db-data: {}

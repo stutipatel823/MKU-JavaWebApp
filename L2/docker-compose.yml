@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  frontend-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-FrontendWebApp  # Reference the correct Dockerfile for the frontend
+    ports:
+      - "8080:8080"  # Expose Tomcat port to localhost
+    environment:
+      DB_URL: db  # The hostname 'db' refers to the db service
+      DB_PORT: 3306
+    networks:
+      - app-network
+    depends_on:
+      - db  # Make sure the database starts first
+
+  db:
+    image: mysql:8.0.23  # Use the official MySQL image
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: Frontend_MKU
+    ports:
+      - "3307:3306"  # Expose MySQL port to localhost (change to 3307 if conflict arises)
+    networks:
+      - app-network
+    volumes:
+      - db-data:/var/lib/mysql  # Store MySQL data persistently
+      - ./sql:/docker-entrypoint-initdb.d  # Initialize the database with custom SQL (if applicable)
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data: {}

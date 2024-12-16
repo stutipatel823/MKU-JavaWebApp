@@ -1,0 +1,12 @@
+# Use the official MySQL image
+FROM mysql:8.0.23
+
+# Set environment variables to configure MySQL root password and database name
+ENV MYSQL_ROOT_PASSWORD=root1234
+ENV MYSQL_DATABASE=Frontend_MKU
+
+# Optionally, you can copy an SQL file to initialize the database (if necessary)
+COPY ./sql/init.sql /docker-entrypoint-initdb.d/
+
+# Expose MySQL port
+EXPOSE 3306

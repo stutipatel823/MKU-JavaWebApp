@@ -1,0 +1,37 @@
+services:
+  tomcat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # Map Tomcat's port 8080 to localhost
+    environment:
+      DB_URL: db  # MySQL service name
+      DB_PORT: 3306  # MySQL port inside the container
+      DB_USERNAME: root
+      DB_PASSWORD: root1234
+    depends_on:
+      - db  # Ensure db starts first
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0.23
+    container_name: mysql-container
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: Frontend_MKU
+    ports:
+      - "3307:3306"  # Map MySQL's port to localhost
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d  # Load schema and initial data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  db_data:

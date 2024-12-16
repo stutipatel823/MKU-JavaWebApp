@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-db
+  labels:
+    app: frontend-db
+spec:
+  replicas: 1  # For MySQL, we typically run 1 replica unless clustering is required
+  selector:
+    matchLabels:
+      app: frontend-db
+  template:
+    metadata:
+      labels:
+        app: frontend-db
+    spec:
+      containers:
+        - name: mysql-db
+          image: stutipatel8/learn:frontenddb
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root1234"
+            - name: MYSQL_DATABASE
+              value: "Frontend_MKU"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          emptyDir: {}  # You can replace this with a PersistentVolumeClaim for data persistence
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-db
+spec:
+  selector:
+    app: frontend-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

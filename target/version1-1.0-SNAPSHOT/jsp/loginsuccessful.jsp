@@ -1,9 +1,3 @@
-<%-- 
-    Document   : loginsuccessful
-    Created on : Jan. 20, 2023, 6:23:50 p.m.
-    Author     : stutipatel
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page import="com.mku.version1.UserInfo" %>
 
@@ -12,15 +6,30 @@
 %>
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Login Successful</title>
-    </head>
-    <body>
-        <h1>Welcome, <%= user.getFirstname()+ " "+ user.getLastname()%>!</h1>
-        <p>Email: <%= user.getEmail()%></p>
-        <p>Phone Number: <%= user.getPhonenumber()%></p>
-        <p>Username: <%= user.getUsername()%></p>
-        <p>Password: <%= user.getPassword()%></p>
-    </body>
+
+<head>
+    <title> Makeup Universe </title>
+    <link rel="stylesheet" type="text/css" href="/version1/css/common.css">
+</head>
+
+<body>
+    <div class="container" style="justify-content: center">
+        <div class="menu-container">
+            <h1 class="title">Hello <%= user.getFirstname() %> <%= user.getLastname() %></h1>
+            <p class="welcome-message">Welcome to Makeup Universe! Your beauty destination.</p>
+            <img src="../Resources/logo.png" height="250" width="250">
+            <div class="button-container">
+                <a href="${pageContext.request.contextPath}/cart">
+                    <button class="btn" style="background-color: pink;" type="button">View My Cart</button>
+                </a>
+                <a href="${pageContext.request.contextPath}/searchproducts" class="search">
+                    <button class="btn" style="background-color: pink;" type="button">Search Products</button>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
 </html>

@@ -1,18 +1,28 @@
-<%-- 
-    Document   : loginfailed
-    Created on : Jan. 20, 2023, 6:23:50 p.m.
-    Author     : stutipatel
---%>
+<%@page import="java.util.*"%>
 
-<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%> -->
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Login Failed</title>
-</head>
+
+    <title> Makeup Universe </title>
+    <link rel="stylesheet" type="text/css" href="/version1/css/common.css">
+
+
 <body>
-    <h1>Login Failed!</h1>
-    <p>Please try again. <a href="index.html">Login</a></p>
+    <div class="container">
+        <img src="Resources/logo.png" height="300" width="300">
+        <div class="alert alert-danger" role="alert">
+            <center>
+                <br>
+                Login unsuccessful.
+                <br>
+                <p>Return to <a href="index.html"> Login</a></p>
+            </center>
+        </div>
+    </div>
+
 </body>
+
 </html>

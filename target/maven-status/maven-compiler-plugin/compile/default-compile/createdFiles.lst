@@ -1,3 +1,9 @@
+com/mku/version1/CartServlet.class
+com/mku/version1/OrderInfo.class
+com/mku/version1/OrdersServlet.class
+com/mku/version1/request.class
 com/mku/version1/UserInfo.class
+com/mku/version1/SearchProductsServlet.class
+com/mku/version1/ProductInfo.class
 com/mku/version1/SignupServlet.class
 com/mku/version1/LoginServlet.class

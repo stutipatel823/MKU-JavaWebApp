@@ -67,6 +67,26 @@ In the JSP, the user data is retrieved from the session and displayed:
 UserInfo user = (UserInfo) session.getAttribute("LoggedInUser");
 ```
 
+### 4. What is `contextPath`?
+
+In a Java web application, the **context path** is the base URL where your application is deployed. It helps create links that will always work, no matter where the app is hosted.
+
+#### How is `contextPath` used?
+
+In this project, `contextPath` is used in JSP pages to create dynamic URLs that point to the right location. For example:
+
+```jsp
+<a href="${pageContext.request.contextPath}/cart">
+    <button type="button">My Cart</button>
+</a>
+```
+
+- `${pageContext.request.contextPath}` generates the correct base URL for the application, making sure links work properly.
+
+#### Why use `contextPath`?
+
+Using `contextPath` makes your links adaptable. If the app is deployed in a different location, these links will still point to the correct page without needing to be changed.
+
 ## UserInfo Class
 
 The `UserInfo` class is a simple JavaBean/Plain Old Java Object (POJO) that holds user details such as:

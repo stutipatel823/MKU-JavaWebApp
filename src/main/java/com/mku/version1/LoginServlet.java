@@ -13,18 +13,22 @@ import java.sql.*;
 
 @WebServlet(name = "LoginServlet", urlPatterns = { "/login" })
 public class LoginServlet extends HttpServlet {
-    UserInfo user = new UserInfo();
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Initialize response content type
         response.setContentType("text/html;charset=UTF-8");
 
-        // 1. Get user info
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        // Create a new UserInfo object for this login attempt
+        UserInfo user = new UserInfo();
 
-        // 2. Connect to database and query user
+        // Get user info from the request and trim whitespace
+        String email = request.getParameter("email").trim();
+        String password = request.getParameter("password").trim();
+
+        // Debug print the trimmed email and password
+        System.out.println("Trimmed Email: " + email + ", Trimmed Password: " + password);
+
+        // Database connection details
         String DB_URL = "jdbc:mysql://localhost:3306/mku";
         String dbUsername = "root";
         String dbPassword = "root1234";
@@ -33,32 +37,50 @@ public class LoginServlet extends HttpServlet {
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+            System.out.println("Database Driver Loaded Successfully.");
+
             try (Connection conn = DriverManager.getConnection(DB_URL, dbUsername, dbPassword)) {
-                // 3. Prepare query to see if username and password are correct
-                String query = "SELECT * FROM Users WHERE username = ? AND password = ?";
+                System.out.println("Connected to the database.");
+
+                // Use LOWER() in SQL to ensure case insensitivity, if needed
+                String query = "SELECT * FROM User WHERE LOWER(email) = LOWER(?) AND password = ?";
                 try (PreparedStatement pst = conn.prepareStatement(query)) {
-                    pst.setString(1, username);
+                    pst.setString(1, email);
                     pst.setString(2, password);
-                    
-                    // 4. Process query 
+
+                    // Print the query and parameters to check for correctness
+                    System.out.println("Executing query with Email: " + email + " and Password: " + password);
+
                     try (ResultSet rs = pst.executeQuery()) {
                         if (rs.next()) {
-                            // Populate user object with data from the database
-                            user.setFirstname(rs.getString("first_name"));
-                            user.setLastname(rs.getString("last_name"));
-                            user.setUsername(rs.getString("username"));
-                            user.setEmail(rs.getString("email"));
-                            user.setPhonenumber(rs.getInt("phone_number")); // Assuming phone_number is an int
-                            user.setPassword(rs.getString("password"));
+                            System.out.println("User found with provided email and password.");
 
-                            // Store user object in session
+                            // Populate user object with data from the database
+                            user.setFirstname(rs.getString("firstname"));
+                            user.setLastname(rs.getString("lastname"));
+                            user.setEmail(rs.getString("email"));
+                            user.setPassword(rs.getString("password"));
+                            user.setPhonenumber(rs.getString("phonenumber"));
+                            user.setUserId(rs.getInt("user_id"));
+
+                            // Populate address if it exists
+                            user.setStreet(rs.getString("street") != null ? rs.getString("street") : "");
+                            user.setCity(rs.getString("city") != null ? rs.getString("city") : "");
+                            user.setProvince(rs.getString("province") != null ? rs.getString("province") : "");
+                            user.setCountry(rs.getString("country") != null ? rs.getString("country") : "");
+                            user.setPostalCode(rs.getString("postalcode") != null ? rs.getString("postalcode") : "");
+
+                            // Clear any existing user from the session
+                            request.getSession().removeAttribute("LoggedInUser");
+
+                            // Store the new user object in session
                             request.getSession().setAttribute("LoggedInUser", user);
 
                             // Forward to loginsuccessful.jsp
                             RequestDispatcher dispatcher = request.getRequestDispatcher("/jsp/loginsuccessful.jsp");
                             dispatcher.forward(request, response);
-                        }else {// else for username password incorrect
-                            // Redirect to loginfailed.jsp if login fails
+                        } else {
+                            System.out.println("No user found with provided email and password.");
                             request.getRequestDispatcher("/jsp/loginfailed.jsp").forward(request, response);
                             out.println("<h1>Invalid username or password.</h1>");
                         }
@@ -66,11 +88,13 @@ public class LoginServlet extends HttpServlet {
                 }
             }
         } catch (ClassNotFoundException e) {
-            throw new ServletException("Database Driver not found.", e);
+            System.out.println("Database Driver not found.");
+            e.printStackTrace();
         } catch (SQLException e) {
-            throw new ServletException("Database error occurred.", e);
+            System.out.println("Database error occurred.");
+            e.printStackTrace();
         } finally {
-            out.close(); // Ensure the writer is closed
+            out.close();
         }
     }
 

@@ -1,0 +1,5 @@
+com/mku/search/helper/ProductInfo.class
+com/mku/search/resources/SearchResource.class
+com/mku/search/persistence/SearchProduct_CRUD.class
+com/mku/search/business/SearchProductService.class
+com/mku/search/helper/ProductsXML.class

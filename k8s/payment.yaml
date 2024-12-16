@@ -1,0 +1,105 @@
+# Payment Application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-app
+  namespace: microservices
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-app
+  template:
+    metadata:
+      labels:
+        app: payment-app
+    spec:
+      containers:
+      - name: payment-app
+        image: stutipatel8/learn:paymentWebApp
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+        env:
+        - name: DB_URL
+          value: "payment-db"
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-app
+  namespace: microservices
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: payment-app
+  type: LoadBalancer
+---
+# Payment Database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-db
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-db
+  template:
+    metadata:
+      labels:
+        app: payment-db
+    spec:
+      containers:
+      - name: payment-db
+        image: stutipatel8/learn:paymentdb
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root1234"
+        - name: MYSQL_DATABASE
+          value: "Payment_MKU"
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: payment-db-storage
+      volumes:
+      - name: payment-db-storage
+        persistentVolumeClaim:
+          claimName: payment-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-db
+  namespace: microservices
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: payment-db
+  type: ClusterIP

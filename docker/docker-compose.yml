@@ -1,0 +1,189 @@
+version: "3.8"
+
+services:
+  # Frontend Application Service
+  frontend-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-FrontendWebApp  # Dockerfile for the frontend web application
+    ports:
+      - "8080:8080"  # Expose Tomcat port to localhost for the frontend app
+    environment:
+      DB_URL: frontend-db  # The hostname 'frontend-db' points to the frontend-db service
+      DB_PORT: 3306
+      cartService: cart-webapp:8080  # Internal hostname and port for the cart service
+      orderService: order-webapp:8080 # Internal hostname and port for the order service
+      paymentService: payment-webapp:8080 # Internal hostname and port for the payment service
+      searchService: search-webapp:8080 # Internal hostname and port for the search service
+    networks:
+      - app-network  # Connect to the app-network
+    depends_on:
+      - frontend-db  # Ensure the frontend database starts first
+      - cart-webapp  # Ensure the cart service starts before the frontend app
+      - order-webapp  # Ensure the order service starts before the frontend app
+      - payment-webapp  # Ensure the payment service starts before the frontend app
+      - search-webapp  # Ensure the search service starts before the frontend app
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
+  # Frontend Database Service (MySQL)
+  frontend-db:
+    image: stutipatel8/learn:frontenddb  # Custom MySQL image for frontend database
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-FrontendDB  # Dockerfile for the frontend DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234  # Set root password for MySQL
+      MYSQL_DATABASE: Frontend_MKU  # Name of the database for frontend
+    ports:
+      - "3307:3306"  # Expose MySQL port for the frontend DB (localhost:3307 -> container:3306)
+    networks:
+      - app-network
+    volumes:
+      - frontend-db-data:/var/lib/mysql  # Persist MySQL data for the frontend DB
+
+  # Cart Application Service
+  cart-webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-CartWebApp  # Dockerfile for the cart web application
+    ports:
+      - "8081:8080"  # Expose Cart webapp on a different port (localhost:8081 -> container:8080)
+    environment:
+      DB_URL: cart-db  # The hostname 'cart-db' points to the cart-db service
+      DB_PORT: 3306
+    networks:
+      - app-network  # Connect to the app-network
+    depends_on:
+      - cart-db  # Ensure the cart database starts before the web app
+
+  # Cart Database Service (MySQL)
+  cart-db:
+    image: stutipatel8/learn:cartdb  # Custom MySQL image for cart database
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-CartDB  # Dockerfile for the cart DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234  # Set root password for MySQL
+      MYSQL_DATABASE: Cart_MKU  # Name of the database for the cart
+    ports:
+      - "3308:3306"  # Expose MySQL port for the cart DB (localhost:3308 -> container:3306)
+    networks:
+      - app-network
+    volumes:
+      - cart-db-data:/var/lib/mysql  # Persist MySQL data for the cart DB
+
+  # Order Application Service
+  order-webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-OrderWebApp  # Dockerfile for the order web application
+    ports:
+      - "8082:8080"  # Expose Order webapp on a different port (localhost:8082 -> container:8080)
+    environment:
+      DB_URL: order-db  # The hostname 'order-db' points to the order-db service
+      DB_PORT: 3306
+    networks:
+      - app-network  # Connect to the app-network
+    depends_on:
+      - order-db  # Ensure the order database starts before the web app
+
+  # Order Database Service (MySQL)
+  order-db:
+    image: stutipatel8/learn:orderdb  # Custom MySQL image for order database
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-OrderDB  # Dockerfile for the order DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234  # Set root password for MySQL
+      MYSQL_DATABASE: Order_MKU  # Name of the database for the order
+    ports:
+      - "3309:3306"  # Expose MySQL port for the order DB (localhost:3309 -> container:3306)
+    networks:
+      - app-network
+    volumes:
+      - order-db-data:/var/lib/mysql  # Persist MySQL data for the order DB
+
+  # Payment Application Service
+  payment-webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-PaymentWebApp  # Dockerfile for the payment web application
+    ports:
+      - "8083:8080"  # Expose Payment webapp on a different port (localhost:8083 -> container:8080)
+    environment:
+      DB_URL: payment-db  # The hostname 'payment-db' points to the payment-db service
+      DB_PORT: 3306
+    networks:
+      - app-network
+    depends_on:
+      - payment-db  # Ensure the payment database starts before the web app
+
+  # Payment Database Service (MySQL)
+  payment-db:
+    image: stutipatel8/learn:paymentdb  # Custom MySQL image for payment database
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-PaymentDB  # Dockerfile for the payment DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234  # Set root password for MySQL
+      MYSQL_DATABASE: Payment_MKU  # Name of the database for payment
+    ports:
+      - "3310:3306"  # Expose MySQL port for the payment DB (localhost:3310 -> container:3306)
+    networks:
+      - app-network
+    volumes:
+      - payment-db-data:/var/lib/mysql  # Persist MySQL data for the payment DB
+
+  # Search Application Service
+  search-webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-SearchWebApp  # Dockerfile for the search web application
+    ports:
+      - "8084:8080"  # Expose Search webapp on a different port (localhost:8083 -> container:8080)
+    environment:
+      DB_URL: search-db  # The hostname 'search-db' points to the search-db service
+      DB_PORT: 3306
+    networks:
+      - app-network
+    depends_on:
+      - search-db  # Ensure the search database starts before the web app
+
+  # Search Database Service (MySQL)
+  search-db:
+    image: stutipatel8/learn:searchdb  # Custom MySQL image for search database
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile-SearchDB  # Dockerfile for the search DB
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234  # Set root password for MySQL
+      MYSQL_DATABASE: Search_MKU  # Name of the database for search
+    ports:
+      - "3311:3306"  # Expose MySQL port for the search DB (localhost:3311 -> container:3306)
+    networks:
+      - app-network
+    volumes:
+      - search-db-data:/var/lib/mysql  # Persist MySQL data for the search DB
+
+networks:
+  app-network:
+    driver: bridge  # Use bridge network for communication between services
+
+volumes:
+  frontend-db-data: {}
+  cart-db-data: {}
+  order-db-data: {}
+  payment-db-data: {}
+  search-db-data: {}

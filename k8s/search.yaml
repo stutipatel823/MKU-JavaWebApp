@@ -1,0 +1,105 @@
+# Search Application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-app
+  namespace: microservices
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: search-app
+  template:
+    metadata:
+      labels:
+        app: search-app
+    spec:
+      containers:
+      - name: search-app
+        image: stutipatel8/learn:searchWebApp
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+        env:
+        - name: DB_URL
+          value: "search-db"
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-app
+  namespace: microservices
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: search-app
+  type: LoadBalancer
+---
+# Search Database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-db
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-db
+  template:
+    metadata:
+      labels:
+        app: search-db
+    spec:
+      containers:
+      - name: search-db
+        image: stutipatel8/learn:searchdb
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root1234"
+        - name: MYSQL_DATABASE
+          value: "Search_MKU"
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: search-db-storage
+      volumes:
+      - name: search-db-storage
+        persistentVolumeClaim:
+          claimName: search-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-db
+  namespace: microservices
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: search-db
+  type: ClusterIP

@@ -1,0 +1,124 @@
+# Frontend Application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-app
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      containers:
+      - name: frontend-app
+        image: stutipatel8/learn:frontendWebApp
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+        env:
+        - name: DB_URL
+          value: "frontend-db"
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+        - name: searchService
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: searchService
+        - name: cartService
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: cartService
+        - name: paymentService
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: paymentService
+        - name: orderService
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: orderService
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-app
+  namespace: microservices
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: frontend-app
+  type: LoadBalancer
+---
+# Frontend Database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-db
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-db
+  template:
+    metadata:
+      labels:
+        app: frontend-db
+    spec:
+      containers:
+      - name: frontend-db
+        image: stutipatel8/learn:frontenddb
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root1234"
+        - name: MYSQL_DATABASE
+          value: "Frontend_MKU"
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: frontend-db-storage
+      volumes:
+      - name: frontend-db-storage
+        persistentVolumeClaim:
+          claimName: frontend-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-db
+  namespace: microservices
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: frontend-db
+  type: ClusterIP

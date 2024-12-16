@@ -1,0 +1,24 @@
+/* Basic table styling */
+.menu-container{
+    border: 1px solid black;
+    box-shadow: none;
+}
+table{
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+    font-size: 14px;
+}
+
+/* Hide all borders initially */
+th, td {
+    border: none;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+/* Add bottom border to <thead> */
+thead {
+    border:none;
+    border-bottom: 1px solid black;
+}

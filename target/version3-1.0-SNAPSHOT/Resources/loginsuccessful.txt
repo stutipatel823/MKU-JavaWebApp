@@ -1,0 +1,40 @@
+<%-- 
+    Document   : loginsuccessful
+    Created on : Jan. 20, 2023, 6:23:50 p.m.
+    Author     : stutipatel
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="com.mku.version1.UserInfo" %>
+
+<%
+    UserInfo user = (UserInfo) session.getAttribute("LoggedInUser");
+%>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Login Successful</title>
+        <style>
+            .warning { width: fit-content; padding: 2px; border: 1px solid orange; color: orange; }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome, <%= user.getFirstname()+ " "+ user.getLastname()%>!</h1>
+        <p>Email: <%= user.getEmail()%></p>
+        <p>Phone Number: <%= user.getPhonenumber()%></p>
+        <p>Username: <%= user.getEmail()%></p>
+        <p>Password: <%= user.getPassword()%></p>
+        <%
+            if (user.getStreet()!=null || user.getCity()!=null || user.getProvince()!=null || user.getCountry()!=null || user.getPostalCode()!=null){
+        %>
+            <p>Address: <%= user.getStreet()%>, <%= user.getCity()%>, <%= user.getProvince()%>, <%= user.getCountry()%>, <%= user.getPostalCode()%></p>
+        <%
+            } else{
+        %>
+            <p class="warning">Warning: Address Not Provided By The User</p>
+        <%
+            }
+        %>
+    </body>
+</html>
